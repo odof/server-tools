@@ -6,7 +6,7 @@ import re
 
 from datetime import datetime, timedelta
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, SUPERUSER_ID
 
 from ..exceptions import PassError
 
@@ -67,6 +67,10 @@ class ResUsers(models.Model):
 
     @api.multi
     def _check_password(self, password):
+        # Modification OpenFire
+        if len(self) == 1 and self.id == SUPERUSER_ID:
+            return True
+        # FIN modification OpenFire
         self._check_password_rules(password)
         self._check_password_history(password)
         return True
@@ -94,6 +98,10 @@ class ResUsers(models.Model):
     @api.multi
     def _password_has_expired(self):
         self.ensure_one()
+        # Modification OpenFire
+        if self.id == SUPERUSER_ID:
+            return False
+        # FIN modification OpenFire
         if not self.password_write_date:
             return True
         write_date = fields.Datetime.from_string(self.password_write_date)
